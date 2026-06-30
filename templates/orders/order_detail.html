@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Order Details #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Main Order Details -->
+    <div class="col-lg-8 mb-4">
+        <!-- Status & Tracking -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Order #{{ order.id }} Details</h5>
+                <span class="badge fs-6 
+                    {% if order.status == 'DELIVERED' %}bg-success
+                    {% elif order.status == 'PAID' %}bg-primary
+                    {% elif order.status == 'PENDING' %}bg-warning
+                    {% elif order.status == 'CANCELLED' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            <p class="small text-secondary mb-4">Placed on: {{ order.created_at|date:"Y-m-d H:i:s" }}</p>
+            
+            <!-- Order tracking steps -->
+            <div class="row text-center mb-4 g-2">
+                <div class="col-3">
+                    <div class="p-2 border rounded-4 bg-light {% if order.status != 'CANCELLED' %}border-primary{% endif %}">
+                        <i class="bi bi-cart-check fs-4"></i>
+                        <p class="small mb-0 mt-1">Placed</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="p-2 border rounded-4 {% if order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'DELIVERED' %}border-primary bg-light{% else %}text-muted{% endif %}">
+                        <i class="bi bi-wallet2 fs-4"></i>
+                        <p class="small mb-0 mt-1">Paid</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="p-2 border rounded-4 {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}border-primary bg-light{% else %}text-muted{% endif %}">
+                        <i class="bi bi-truck fs-4"></i>
+                        <p class="small mb-0 mt-1">Shipped</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="p-2 border rounded-4 {% if order.status == 'DELIVERED' %}border-primary bg-light{% else %}text-muted{% endif %}">
+                        <i class="bi bi-house-check fs-4"></i>
+                        <p class="small mb-0 mt-1">Delivered</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice and Actions -->
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <a href="{% url 'orders:generate_invoice' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-4"><i class="bi bi-file-earmark-pdf me-1"></i> Download Invoice (PDF)</a>
+                
+                {% if order.status == 'PENDING' or order.status == 'PAID' %}
+                    <a href="{% url 'orders:cancel_order' order.id %}" class="btn btn-outline-danger btn-sm rounded-pill px-4" onclick="return confirm('Are you sure you want to cancel this order?');"><i class="bi bi-x-circle me-1"></i> Cancel Order</a>
+                {% elif order.status == 'DELIVERED' %}
+                    <a href="{% url 'orders:return_order' order.id %}" class="btn btn-outline-warning btn-sm rounded-pill px-4" onclick="return confirm('Are you sure you want to return this order?');"><i class="bi bi-arrow-left-right me-1"></i> Return Order</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h5 class="fw-bold mb-4">Items in Order</h5>
+            <div class="d-flex flex-column gap-3">
+                {% for item in order.items.all %}
+                    <div class="row align-items-center border-bottom pb-3 mb-3">
+                        <div class="col-2">
+                            {% if item.product.images.first %}
+                                <img src="{{ item.product.images.first.image.url }}" class="img-fluid rounded-3" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="bg-light rounded-3 text-center py-2"><i class="bi bi-image"></i></div>
+                            {% endif %}
+                        </div>
+                        <div class="col-6 col-md-7">
+                            <h6 class="fw-bold mb-0">{{ item.product.name }}</h6>
+                            {% if item.variant %}
+                                <span class="badge bg-secondary small mb-0">{{ item.variant.name }}: {{ item.variant.value }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-4 col-md-3 text-end">
+                            <span class="small text-secondary">{{ item.quantity }} x ${{ item.price }}</span><br>
+                            <span class="fw-bold text-dark">${{ item.total_price }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Details sidebar -->
+    <div class="col-lg-4">
+        <!-- Address card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <h5 class="fw-bold mb-3">Shipping Details</h5>
+            <h6 class="fw-bold mb-1">{{ order.shipping_address.full_name }}</h6>
+            <p class="small text-secondary mb-2">
+                {{ order.shipping_address.address_line1 }}{% if order.shipping_address.address_line2 %}, {{ order.shipping_address.address_line2 }}{% endif %}<br>
+                {{ order.shipping_address.city }}, {{ order.shipping_address.state }} - {{ order.shipping_address.postal_code }}
+            </p>
+            <p class="small text-secondary mb-0">Phone: {{ order.shipping_address.phone_number }}</p>
+        </div>
+
+        <!-- Payment method card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <h5 class="fw-bold mb-3">Payment Information</h5>
+            <p class="small text-secondary mb-1">Method: <strong>{{ order.get_payment_method_display }}</strong></p>
+            <p class="small text-secondary mb-0">Status: 
+                <span class="badge {% if order.payment_details.status == 'SUCCESS' %}bg-success{% else %}bg-warning{% endif %}">
+                    {{ order.payment_details.get_status_display }}
+                </span>
+            </p>
+        </div>
+
+        <!-- Order price breakdown -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h5 class="fw-bold mb-4">Total Summary</h5>
+            
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Subtotal</span>
+                <span class="fw-semibold">${{ order.total_amount }}</span>
+            </div>
+            {% if order.discount_amount > 0 %}
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                    <span class="text-secondary">Discount</span>
+                    <span class="fw-semibold text-success">-${{ order.discount_amount }}</span>
+                </div>
+            {% endif %}
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Shipping</span>
+                <span class="fw-semibold">${{ order.shipping_charge }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Tax (5%)</span>
+                <span class="fw-semibold">${{ order.tax }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="fw-bold fs-5">Final Total</span>
+                <span class="fw-bold fs-5 text-primary">${{ order.final_amount }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

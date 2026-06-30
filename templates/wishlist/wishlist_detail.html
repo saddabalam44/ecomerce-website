@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Wishlist{% endblock %}
+{% block content %}
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <h4 class="fw-bold mb-4">My Wishlist</h4>
+    
+    {% if wishlist_items %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Image</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Stock Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in wishlist_items %}
+                        <tr class="wishlist-row">
+                            <!-- Image -->
+                            <td>
+                                {% if item.product.images.first %}
+                                    <img src="{{ item.product.images.first.image.url }}" class="img-fluid rounded-3" style="max-height: 80px;" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <div class="bg-light rounded-3 text-center py-3">
+                                        <i class="bi bi-image text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <!-- Name -->
+                            <td>
+                                <h6 class="fw-bold mb-0"><a href="{% url 'products:detail' item.product.slug %}" class="text-decoration-none text-dark">{{ item.product.name }}</a></h6>
+                                <span class="small text-secondary">{{ item.product.category.name }}</span>
+                            </td>
+                            <!-- Price -->
+                            <td>
+                                {% if item.product.discount_price %}
+                                    <span class="fw-bold text-primary">${{ item.product.discount_price }}</span>
+                                    <span class="text-decoration-line-through text-muted small ms-1">${{ item.product.price }}</span>
+                                {% else %}
+                                    <span class="fw-bold">${{ item.product.price }}</span>
+                                {% endif %}
+                            </td>
+                            <!-- Stock -->
+                            <td>
+                                {% if item.product.stock > 0 %}
+                                    <span class="badge bg-success-subtle text-success">In Stock</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                            <!-- Action button -->
+                            <td class="text-end">
+                                <a href="{% url 'wishlist:wishlist_move_to_cart_view' item.product.id %}" class="btn btn-primary btn-sm rounded-pill px-3 me-2"><i class="bi bi-cart-plus me-1"></i> Add to Cart</a>
+                                <a href="{% url 'wishlist:wishlist_remove' item.product.id %}" class="btn btn-outline-danger btn-sm rounded-pill btn-remove-wishlist"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-heart fs-1 text-muted mb-3 d-block"></i>
+            <p>Your wishlist is empty. Add items from details to view them later.</p>
+            <a href="{% url 'products:list' %}" class="btn btn-primary rounded-pill px-4">Browse Catalog</a>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".btn-remove-wishlist").forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                e.preventDefault();
+                const url = this.getAttribute("href");
+                const row = this.closest(".wishlist-row");
+                
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        row.remove();
+                        document.querySelectorAll('.wishlist-badge').forEach(b => b.textContent = data.wishlist_count);
+                        if(data.wishlist_count === 0){
+                            location.reload();
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

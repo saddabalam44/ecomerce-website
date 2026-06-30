@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Home{% endblock %}
+{% block content %}
+
+<!-- Hero Showcase -->
+<div class="hero-section">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <span class="badge bg-info mb-3 text-uppercase fw-bold">New Season Arrivals</span>
+            <h1 class="display-4 fw-bold text-white mb-3">Elevate Your Everyday Shopping</h1>
+            <p class="lead text-white-50 mb-4">Discover curated luxury items, fast delivery options, and secure checkouts all under one secure roof.</p>
+            <a href="{% url 'products:list' %}" class="btn btn-gradient btn-lg shadow-sm">Shop Catalog</a>
+        </div>
+        <div class="col-lg-5 offset-lg-1 text-center d-none d-lg-block">
+            <i class="bi bi-shop text-info" style="font-size: 10rem; opacity: 0.8;"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Browse Categories -->
+<div class="mb-5">
+    <h3 class="fw-bold mb-4">Shop by Category</h3>
+    <div class="row g-4">
+        {% if categories %}
+            {% for cat in categories %}
+                <div class="col-6 col-md-3 col-lg-2">
+                    <a href="{% url 'products:list' %}?category={{ cat.slug }}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm text-center py-4 px-2 product-card h-100">
+                            <div class="fs-1 text-primary mb-2">
+                                <i class="bi bi-tag-fill"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-0">{{ cat.name }}</h6>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center text-muted">
+                <p>No categories created yet. Log in to Django Admin or the Dashboard to add categories.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Featured Products Section -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Featured Collections</h3>
+        <a href="{% url 'products:list' %}?is_featured=true" class="text-primary text-decoration-none fw-semibold">View All <i class="bi bi-arrow-right"></i></a>
+    </div>
+    
+    <div class="row g-4">
+        {% if featured_products %}
+            {% for prod in featured_products %}
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 product-card">
+                        <a href="{% url 'products:detail' prod.slug %}">
+                            <div class="product-img-wrapper">
+                                {% if prod.images.first %}
+                                    <img src="{{ prod.images.first.image.url }}" alt="{{ prod.name }}">
+                                {% else %}
+                                    <div class="position-absolute w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
+                                        <i class="bi bi-image fs-1"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <span class="text-uppercase text-xs text-muted mb-1">{{ prod.category.name }}</span>
+                            <h5 class="card-title fw-bold fs-6 mb-2">
+                                <a href="{% url 'products:detail' prod.slug %}" class="text-decoration-none text-dark">{{ prod.name }}</a>
+                            </h5>
+                            
+                            <div class="d-flex align-items-center mb-3 mt-auto">
+                                {% if prod.discount_price %}
+                                    <span class="fs-5 fw-bold text-primary me-2">${{ prod.discount_price }}</span>
+                                    <span class="text-decoration-line-through text-muted small">${{ prod.price }}</span>
+                                {% else %}
+                                    <span class="fs-5 fw-bold text-dark">${{ prod.price }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <form action="{% url 'cart:cart_add' prod.id %}" method="POST" class="add-to-cart-form mt-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary w-100 rounded-pill"><i class="bi bi-cart-plus me-2"></i>Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center text-muted py-5">
+                <p>Featured products will show up here. Add featured products via Admin panel.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Latest Products Section -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Latest Arrivals</h3>
+        <a href="{% url 'products:list' %}" class="text-primary text-decoration-none fw-semibold">View All Arrivals <i class="bi bi-arrow-right"></i></a>
+    </div>
+    
+    <div class="row g-4">
+        {% if latest_products %}
+            {% for prod in latest_products %}
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 product-card">
+                        <a href="{% url 'products:detail' prod.slug %}">
+                            <div class="product-img-wrapper">
+                                {% if prod.images.first %}
+                                    <img src="{{ prod.images.first.image.url }}" alt="{{ prod.name }}">
+                                {% else %}
+                                    <div class="position-absolute w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
+                                        <i class="bi bi-image fs-1"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <span class="text-uppercase text-xs text-muted mb-1">{{ prod.category.name }}</span>
+                            <h5 class="card-title fw-bold fs-6 mb-2">
+                                <a href="{% url 'products:detail' prod.slug %}" class="text-decoration-none text-dark">{{ prod.name }}</a>
+                            </h5>
+                            
+                            <div class="d-flex align-items-center mb-3 mt-auto">
+                                {% if prod.discount_price %}
+                                    <span class="fs-5 fw-bold text-primary me-2">${{ prod.discount_price }}</span>
+                                    <span class="text-decoration-line-through text-muted small">${{ prod.price }}</span>
+                                {% else %}
+                                    <span class="fs-5 fw-bold text-dark">${{ prod.price }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <form action="{% url 'cart:cart_add' prod.id %}" method="POST" class="add-to-cart-form mt-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary w-100 rounded-pill"><i class="bi bi-cart-plus me-2"></i>Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center text-muted py-5">
+                <p>Products catalog is empty. Add products via Admin panel to populate.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

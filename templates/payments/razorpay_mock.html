@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Razorpay Mock Terminal{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center mt-5">
+        <div class="card border-0 shadow-lg p-5 rounded-4 bg-white border-top border-4 border-info">
+            <div class="fs-1 text-info mb-3">
+                <i class="bi bi-cpu" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-2">Razorpay Developer Terminal</h2>
+            <p class="text-secondary mb-4">No Razorpay API Keys are set. We are simulating a Razorpay Checkout Callback for Order <strong>#{{ order.id }}</strong> ($<strong>{{ order.final_amount }}</strong>).</p>
+            
+            <form action="{% url 'payments:razorpay_callback' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" value="{{ order.id }}">
+                <input type="hidden" name="razorpay_payment_id" value="pay_mock_{{ order.id }}">
+                <input type="hidden" name="razorpay_order_id" value="order_mock_{{ order.id }}">
+                <input type="hidden" name="razorpay_signature" value="sig_mock_{{ order.id }}">
+                
+                <div class="d-flex flex-column gap-3">
+                    <button type="submit" class="btn btn-success rounded-pill py-3 fw-bold shadow-sm">
+                        Simulate Payment Success
+                    </button>
+                    <a href="{% url 'payments:payment_selection' order.id %}" class="btn btn-outline-danger rounded-pill py-2">
+                        Simulate Payment Cancellation
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

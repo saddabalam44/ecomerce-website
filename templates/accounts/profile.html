@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Profile{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- User Profile & Edit Details -->
+    <div class="col-md-5 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <div class="text-center mb-4">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="rounded-circle shadow-sm border border-3 border-white mb-3" style="width:120px; height:120px; object-fit:cover;">
+                {% else %}
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white mx-auto mb-3" style="width:120px; height:120px;">
+                        <i class="bi bi-person fs-1"></i>
+                    </div>
+                {% endif %}
+                <h4 class="fw-bold">{{ user.username }}</h4>
+                <p class="text-secondary small">{{ user.email }}</p>
+                <span class="badge bg-success">Verified Account</span>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h5 class="fw-bold mb-3">Edit Details</h5>
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-100 rounded-pill mt-2">Save Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Addresses & Orders History -->
+    <div class="col-md-7">
+        <!-- Addresses -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">My Addresses</h5>
+                <a href="{% url 'accounts:address_add' %}" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-plus-lg me-1"></i> Add Address</a>
+            </div>
+            
+            <div class="row g-3">
+                {% if addresses %}
+                    {% for addr in addresses %}
+                        <div class="col-md-6">
+                            <div class="border rounded-4 p-3 position-relative {% if addr.is_default %}border-primary bg-light{% endif %}">
+                                {% if addr.is_default %}
+                                    <span class="badge bg-primary position-absolute top-0 end-0 m-3">Default</span>
+                                {% endif %}
+                                <h6 class="fw-bold mb-1">{{ addr.full_name }}</h6>
+                                <p class="small text-secondary mb-2">
+                                    {{ addr.address_line1 }}<br>
+                                    {% if addr.address_line2 %}{{ addr.address_line2 }}<br>{% endif %}
+                                    {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}
+                                </p>
+                                <div class="d-flex small gap-2">
+                                    <a href="{% url 'accounts:address_edit' addr.id %}" class="text-primary text-decoration-none">Edit</a>
+                                    <span class="text-muted">|</span>
+                                    <a href="{% url 'accounts:address_delete' addr.id %}" class="text-danger text-decoration-none">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-secondary py-3">
+                        <p class="mb-0">No addresses saved yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Order History</h5>
+                <a href="{% url 'orders:order_list' %}" class="text-primary text-decoration-none small">View All</a>
+            </div>
+            
+            {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td><span class="fw-bold">#{{ order.id }}</span></td>
+                                    <td class="small">{{ order.created_at|date:"Y-m-d" }}</td>
+                                    <td>${{ order.final_amount }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.status == 'DELIVERED' %}bg-success
+                                            {% elif order.status == 'PAID' %}bg-primary
+                                            {% elif order.status == 'PENDING' %}bg-warning
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center text-secondary py-4">
+                    <p class="mb-0">You have not placed any orders yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

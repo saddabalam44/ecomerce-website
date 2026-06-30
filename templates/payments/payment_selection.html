@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Process Payment{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center mt-5">
+        <div class="card border-0 shadow-lg p-5 rounded-4 bg-white">
+            <h2 class="fw-bold mb-4">Complete Payment</h2>
+            <p class="text-secondary mb-4">Process payment for Order <strong>#{{ order.id }}</strong> amounting to <strong>${{ order.final_amount }}</strong>.</p>
+            
+            <div class="d-flex flex-column gap-3">
+                {% if order.payment_method == 'STRIPE' %}
+                    <a href="{% url 'payments:stripe_checkout' order.id %}" class="btn btn-gradient rounded-pill py-3 fw-bold fs-5 shadow-sm">
+                        <i class="bi bi-stripe me-2"></i> Pay with Stripe
+                    </a>
+                {% elif order.payment_method == 'RAZORPAY' %}
+                    <a href="{% url 'payments:razorpay_checkout' order.id %}" class="btn btn-primary rounded-pill py-3 fw-bold fs-5 shadow-sm">
+                        <i class="bi bi-credit-card me-2"></i> Pay with Razorpay
+                    </a>
+                {% else %}
+                    <p class="text-secondary small mb-3">Order is set to Cash on Delivery. Confirm order placement.</p>
+                    <a href="{% url 'orders:success' order.id %}" class="btn btn-gradient rounded-pill">Complete Order</a>
+                {% endif %}
+                
+                <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-secondary rounded-pill py-2">Pay Later / Back to Order</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

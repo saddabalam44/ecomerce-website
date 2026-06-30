@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Checkout{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Billing/Shipping & Payment selection -->
+    <div class="col-lg-7 mb-4">
+        <form id="checkout-form" method="POST">
+            {% csrf_token %}
+            
+            <!-- Address Selection -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <h5 class="fw-bold mb-3">Select Shipping Address</h5>
+                
+                <div class="row g-3 mb-3">
+                    {% if addresses %}
+                        {% for addr in addresses %}
+                            <div class="col-md-12">
+                                <div class="border rounded-4 p-3 d-flex align-items-start {% if addr.is_default %}border-primary bg-light{% endif %}">
+                                    <input class="form-check-input mt-1 me-3" type="radio" name="shipping_address" value="{{ addr.id }}" {% if addr.is_default %}checked{% endif %}>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">{{ addr.full_name }}</h6>
+                                        <p class="small text-secondary mb-0">
+                                            {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+                                            {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }} ({{ addr.phone_number }})
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 py-3 text-center bg-light rounded-4">
+                            <p class="text-secondary small mb-3">No addresses found. Add a shipping address to proceed.</p>
+                            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="btn btn-primary btn-sm rounded-pill px-4">Add New Address</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h5 class="fw-bold mb-3">Select Payment Method</h5>
+                
+                <div class="d-flex flex-column gap-3 mb-4">
+                    <div class="border rounded-4 p-3 d-flex align-items-center">
+                        <input class="form-check-input me-3" type="radio" name="payment_method" value="COD" checked>
+                        <div>
+                            <h6 class="fw-bold mb-0"><i class="bi bi-wallet2 text-success me-2"></i> Cash on Delivery (COD)</h6>
+                            <p class="small text-secondary mb-0">Pay with cash upon delivery of items.</p>
+                        </div>
+                    </div>
+                    <div class="border rounded-4 p-3 d-flex align-items-center">
+                        <input class="form-check-input me-3" type="radio" name="payment_method" value="STRIPE">
+                        <div>
+                            <h6 class="fw-bold mb-0"><i class="bi bi-stripe text-warning me-2"></i> Pay with Stripe</h6>
+                            <p class="small text-secondary mb-0">Pay securely with Credit Cards using Stripe.</p>
+                        </div>
+                    </div>
+                    <div class="border rounded-4 p-3 d-flex align-items-center">
+                        <input class="form-check-input me-3" type="radio" name="payment_method" value="RAZORPAY">
+                        <div>
+                            <h6 class="fw-bold mb-0"><i class="bi bi-credit-card text-info me-2"></i> Pay with Razorpay</h6>
+                            <p class="small text-secondary mb-0">Pay online using Razorpay UPI, Cards, Netbanking.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if addresses %}
+                    <button type="submit" class="btn btn-gradient w-100 rounded-pill py-2.5">Confirm and Place Order</button>
+                {% else %}
+                    <button type="button" class="btn btn-secondary w-100 rounded-pill py-2.5" disabled>Please Add Shipping Address First</button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Order Items Summary & Coupon -->
+    <div class="col-lg-5">
+        <!-- Coupon input -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+            <h5 class="fw-bold mb-3">Promo Coupon</h5>
+            <div class="input-group">
+                <input type="text" id="coupon-code-input" class="form-control bg-light border-0" placeholder="Enter coupon code">
+                <button class="btn btn-outline-primary" id="btn-apply-coupon" type="button">Apply</button>
+            </div>
+            <div id="coupon-feedback" class="small mt-2"></div>
+        </div>
+
+        <!-- Checkout Summary -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h5 class="fw-bold mb-4">Order Summary</h5>
+            
+            <div class="d-flex flex-column gap-3 mb-4 border-bottom pb-4">
+                {% for item in cart.items.all %}
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold mb-0 small">{{ item.product.name }}</h6>
+                            <span class="text-secondary small">Qty: {{ item.quantity }}</span>
+                        </div>
+                        <span class="fw-bold text-dark small">${{ item.total_price }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Cart Subtotal</span>
+                <span class="fw-semibold">$<span class="chk-subtotal">{{ subtotal }}</span></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Discount Applied</span>
+                <span class="fw-semibold text-success">-$<span class="chk-discount">{{ discount }}</span></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Shipping Charge</span>
+                <span class="fw-semibold">$<span class="chk-shipping">{{ shipping }}</span></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
+                <span class="text-secondary">Tax (5%)</span>
+                <span class="fw-semibold">$<span class="chk-tax">{{ tax }}</span></span>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+                <span class="fw-bold fs-5">Grand Total</span>
+                <span class="fw-bold fs-5 text-primary">$<span class="chk-final-total">{{ final_total }}</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const applyCouponBtn = document.getElementById("btn-apply-coupon");
+        const couponInput = document.getElementById("coupon-code-input");
+        const feedbackDiv = document.getElementById("coupon-feedback");
+
+        applyCouponBtn.addEventListener("click", function() {
+            const code = couponInput.value.trim();
+            if(!code) return;
+            
+            const formData = new FormData();
+            formData.append("coupon_code", code);
+            
+            fetch("{% url 'orders:apply_coupon' %}", {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    feedbackDiv.className = "text-success small mt-2";
+                    feedbackDiv.textContent = data.message;
+                    
+                    // Update discount and totals
+                    const subtotal = parseFloat(document.querySelector(".chk-subtotal").textContent);
+                    const discount = parseFloat(data.discount);
+                    const shipping = parseFloat(document.querySelector(".chk-shipping").textContent);
+                    const tax = (subtotal * 0.05);
+                    
+                    document.querySelector(".chk-discount").textContent = discount.toFixed(2);
+                    document.querySelector(".chk-tax").textContent = tax.toFixed(2);
+                    
+                    const grand = (subtotal - discount + shipping + tax).toFixed(2);
+                    document.querySelector(".chk-final-total").textContent = grand;
+                } else {
+                    feedbackDiv.className = "text-danger small mt-2";
+                    feedbackDiv.textContent = data.message;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

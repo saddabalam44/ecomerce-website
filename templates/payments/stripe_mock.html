@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Stripe Mock Terminal{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center mt-5">
+        <div class="card border-0 shadow-lg p-5 rounded-4 bg-white border-top border-4 border-warning">
+            <div class="fs-1 text-warning mb-3">
+                <i class="bi bi-cpu" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-2">Stripe Developer Terminal</h2>
+            <p class="text-secondary mb-4">No Stripe API Keys are set. We are simulating a Stripe Checkout Session for Order <strong>#{{ order.id }}</strong> ($<strong>{{ order.final_amount }}</strong>).</p>
+            
+            <div class="d-flex flex-column gap-3">
+                <a href="{% url 'payments:stripe_success' %}?order_id={{ order.id }}&session_id=mock-session-{{ order.id }}" class="btn btn-success rounded-pill py-3 fw-bold shadow-sm">
+                    Simulate Payment Success
+                </a>
+                <a href="{% url 'payments:stripe_cancel' %}?order_id={{ order.id }}" class="btn btn-outline-danger rounded-pill py-2">
+                    Simulate Payment Cancellation
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

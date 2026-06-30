@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Shopping Cart{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Items list -->
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h4 class="fw-bold mb-4">Shopping Cart ({{ total_items }} items)</h4>
+            
+            {% if items %}
+                <div class="d-flex flex-column gap-3">
+                    {% for item in items %}
+                        <div class="row align-items-center border-bottom pb-3 mb-3 cart-item-row" data-product-id="{{ item.product.id }}" data-variant-id="{% if item.variant %}{{ item.variant.id }}{% endif %}">
+                            <!-- Image -->
+                            <div class="col-3 col-md-2">
+                                {% if item.product.images.first %}
+                                    <img src="{{ item.product.images.first.image.url }}" class="img-fluid rounded-3" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-secondary py-3">
+                                        <i class="bi bi-image fs-3"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Detail -->
+                            <div class="col-9 col-md-4">
+                                <h6 class="fw-bold mb-0 text-dark">{{ item.product.name }}</h6>
+                                <p class="text-secondary small mb-1">{{ item.product.category.name }}</p>
+                                {% if item.variant %}
+                                    <span class="badge bg-secondary mb-0">{{ item.variant.name }}: {{ item.variant.value }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Quantity adjustment -->
+                            <div class="col-6 col-md-3 mt-2 mt-md-0">
+                                <div class="input-group input-group-sm" style="max-width: 110px;">
+                                    <button class="btn btn-outline-secondary btn-qty-minus" type="button"><i class="bi bi-minus"></i></button>
+                                    <input type="text" class="form-control text-center border-secondary qty-input" value="{{ item.quantity }}" readonly>
+                                    <button class="btn btn-outline-secondary btn-qty-plus" type="button"><i class="bi bi-plus"></i></button>
+                                </div>
+                            </div>
+                            
+                            <!-- Price & Delete -->
+                            <div class="col-6 col-md-3 text-end mt-2 mt-md-0">
+                                <span class="fw-bold fs-5 text-primary">$<span class="item-total">{{ item.total_price }}</span></span>
+                                <button class="btn text-danger ms-2 btn-remove-item border-0"><i class="bi bi-trash fs-5"></i></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-cart3 fs-1 text-muted mb-3"></i>
+                    <p class="text-secondary">Your shopping cart is empty.</p>
+                    <a href="{% url 'products:list' %}" class="btn btn-primary rounded-pill px-4">Start Shopping</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Summary Details -->
+    {% if items %}
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-lg-top" style="top: 90px;">
+                <h5 class="fw-bold mb-4">Summary</h5>
+                
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                    <span class="text-secondary">Subtotal</span>
+                    <span class="fw-bold">$<span class="cart-subtotal">{{ total_price }}</span></span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                    <span class="text-secondary">Shipping</span>
+                    <span class="fw-bold" id="shipping-fee">{% if total_price < 500 %}$50.00{% else %}Free{% endif %}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-4 pb-2 border-bottom">
+                    <span class="text-secondary">Est. Tax (5%)</span>
+                    <span class="fw-bold">$<span class="cart-tax">0.00</span></span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold fs-5">Estimated Total</span>
+                    <span class="fw-bold fs-5 text-primary">$<span class="cart-total-est">{{ total_price }}</span></span>
+                </div>
+                
+                <a href="{% url 'orders:checkout' %}" class="btn btn-gradient w-100 rounded-pill py-2.5">Proceed to Checkout</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const updateCalculations = () => {
+            const subtotalText = document.querySelector(".cart-subtotal");
+            if (!subtotalText) return;
+            
+            const subtotal = parseFloat(subtotalText.textContent);
+            const tax = (subtotal * 0.05).toFixed(2);
+            const shipping = subtotal < 500 ? 50.00 : 0.00;
+            
+            document.querySelector(".cart-tax").textContent = tax;
+            document.getElementById("shipping-fee").textContent = shipping === 0 ? "Free" : "$50.00";
+            
+            const total = (subtotal + parseFloat(tax) + shipping).toFixed(2);
+            document.querySelector(".cart-total-est").textContent = total;
+        };
+
+        updateCalculations();
+
+        // Plus/Minus triggers
+        document.querySelectorAll(".cart-item-row").forEach(row => {
+            const prodId = row.dataset.productId;
+            const varId = row.dataset.variantId || "";
+            const qtyInput = row.querySelector(".qty-input");
+            const priceVal = row.querySelector(".item-total");
+            
+            const triggerQuantityUpdate = (newQty) => {
+                const formData = new FormData();
+                formData.append("quantity", newQty);
+                if(varId) formData.append("variant_id", varId);
+                
+                fetch(`/cart/update/${prodId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        qtyInput.value = newQty;
+                        document.querySelector(".cart-subtotal").textContent = data.total_price.toFixed(2);
+                        
+                        // Update items total
+                        const unitPrice = parseFloat(priceVal.textContent) / (newQty - (formData.get("quantity") === "1" ? -1 : 1));
+                        priceVal.textContent = (newQty * unitPrice).toFixed(2);
+                        
+                        updateCalculations();
+                        
+                        // Update navbar badge
+                        document.querySelectorAll('.cart-badge').forEach(b => b.textContent = data.total_items);
+                    }
+                });
+            };
+
+            row.querySelector(".btn-qty-plus").addEventListener("click", () => {
+                let current = parseInt(qtyInput.value);
+                triggerQuantityUpdate(current + 1);
+            });
+
+            row.querySelector(".btn-qty-minus").addEventListener("click", () => {
+                let current = parseInt(qtyInput.value);
+                if (current > 1) {
+                    triggerQuantityUpdate(current - 1);
+                }
+            });
+
+            row.querySelector(".btn-remove-item").addEventListener("click", () => {
+                const formData = new FormData();
+                if(varId) formData.append("variant_id", varId);
+                
+                fetch(`/cart/remove/${prodId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        row.remove();
+                        document.querySelector(".cart-subtotal").textContent = data.total_price.toFixed(2);
+                        updateCalculations();
+                        document.querySelectorAll('.cart-badge').forEach(b => b.textContent = data.total_items);
+                        if(data.total_items === 0){
+                            location.reload();
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

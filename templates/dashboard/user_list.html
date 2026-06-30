@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Admin Customers{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar navigation -->
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-md-top" style="top: 90px;">
+            <h5 class="fw-bold mb-4">Admin Hub</h5>
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item">
+                    <a class="nav-link text-dark p-2" href="{% url 'dashboard:home' %}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark p-2" href="{% url 'dashboard:product_list' %}"><i class="bi bi-box-seam me-2"></i> Product Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark p-2" href="{% url 'dashboard:order_list' %}"><i class="bi bi-currency-dollar me-2"></i> Sales Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-primary p-2 rounded bg-light" href="{% url 'dashboard:user_list' %}"><i class="bi bi-people me-2"></i> Customers List</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Users list -->
+    <div class="col-md-9">
+        <h3 class="fw-bold mb-4">Customers Directory</h3>
+        
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Avatar</th>
+                            <th>Username</th>
+                            <th>Email Address</th>
+                            <th>Verified</th>
+                            <th>Staff Member</th>
+                            <th>Registered On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                            {% for u in users %}
+                                <tr>
+                                    <td>
+                                        {% if u.profile_picture %}
+                                            <img src="{{ u.profile_picture.url }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" alt="{{ u.username }}">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;"><i class="bi bi-person"></i></div>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="fw-bold text-dark">{{ u.username }}</span></td>
+                                    <td class="small text-secondary">{{ u.email }}</td>
+                                    <td>
+                                        {% if u.is_email_verified %}
+                                            <span class="badge bg-success-subtle text-success">Verified</span>
+                                        {% else %}
+                                            <span class="badge bg-warning-subtle text-warning">Unverified</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if u.is_staff %}
+                                            <span class="badge bg-danger-subtle text-danger">Staff</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary">Customer</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="small text-secondary">{{ u.date_joined|date:"Y-m-d" }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary py-4">No users found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

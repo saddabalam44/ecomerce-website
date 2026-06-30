@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Shop Catalog{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar Filters -->
+    <div class="col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-lg-top" style="top: 90px; z-index: 10;">
+            <h5 class="fw-bold mb-4">Filters</h5>
+            
+            <form method="GET">
+                <!-- Keep search query if present -->
+                {% if query %}
+                    <input type="hidden" name="q" value="{{ query }}">
+                {% endif %}
+                
+                <!-- Category Select -->
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Category</label>
+                    <select name="category" class="form-select bg-light border-0">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.slug }}" {% if selected_category.slug == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                            {% for child in cat.children.all %}
+                                <option value="{{ child.slug }}" {% if selected_category.slug == child.slug %}selected{% endif %}>&nbsp;&nbsp;&mdash; {{ child.name }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Price Range Filter -->
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Price Range</label>
+                    <div class="input-group">
+                        <input type="number" name="min_price" class="form-control bg-light border-0 text-center" placeholder="Min" value="{{ min_price }}">
+                        <span class="input-group-text bg-light border-0">-</span>
+                        <input type="number" name="max_price" class="form-control bg-light border-0 text-center" placeholder="Max" value="{{ max_price }}">
+                    </div>
+                </div>
+
+                <!-- Sort Options -->
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Sort By</label>
+                    <select name="sort" class="form-select bg-light border-0">
+                        <option value="latest" {% if sort_by == 'latest' %}selected{% endif %}>Latest Arrivals</option>
+                        <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Avg Rating</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 rounded-pill mt-2">Apply Filters</button>
+                <a href="{% url 'products:list' %}" class="btn btn-outline-secondary w-100 rounded-pill mt-2 btn-sm">Reset</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Catalog List -->
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                {% if selected_category %}
+                    Category: {{ selected_category.name }}
+                {% elif query %}
+                    Search results for "{{ query }}"
+                {% else %}
+                    All Products
+                {% endif %}
+            </h4>
+            <span class="text-secondary small">{{ page_obj.paginator.count }} products found</span>
+        </div>
+
+        <div class="row g-4">
+            {% if page_obj %}
+                {% for prod in page_obj %}
+                    <div class="col-sm-6 col-md-4 col-lg-4">
+                        <div class="card h-100 product-card">
+                            <a href="{% url 'products:detail' prod.slug %}">
+                                <div class="product-img-wrapper">
+                                    {% if prod.images.first %}
+                                        <img src="{{ prod.images.first.image.url }}" alt="{{ prod.name }}">
+                                    {% else %}
+                                        <div class="position-absolute w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white">
+                                            <i class="bi bi-image fs-1"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            <div class="card-body d-flex flex-column">
+                                <span class="text-uppercase text-xs text-muted mb-1">{{ prod.category.name }}</span>
+                                <h5 class="card-title fw-bold fs-6 mb-2">
+                                    <a href="{% url 'products:detail' prod.slug %}" class="text-decoration-none text-dark">{{ prod.name }}</a>
+                                </h5>
+                                
+                                <div class="d-flex align-items-center mb-3 mt-auto">
+                                    {% if prod.discount_price %}
+                                        <span class="fs-5 fw-bold text-primary me-2">${{ prod.discount_price }}</span>
+                                        <span class="text-decoration-line-through text-muted small">${{ prod.price }}</span>
+                                    {% else %}
+                                        <span class="fs-5 fw-bold text-dark">${{ prod.price }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <form action="{% url 'cart:cart_add' prod.id %}" method="POST" class="add-to-cart-form mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-primary w-100 rounded-pill"><i class="bi bi-cart-plus me-2"></i>Add to Cart</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center text-secondary py-5">
+                    <i class="bi bi-search fs-1 mb-3"></i>
+                    <p class="mb-0">No products found matching your search filters.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a></li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

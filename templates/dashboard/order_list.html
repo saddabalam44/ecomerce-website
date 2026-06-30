@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - Admin Orders{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar navigation -->
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-md-top" style="top: 90px;">
+            <h5 class="fw-bold mb-4">Admin Hub</h5>
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item">
+                    <a class="nav-link text-dark p-2" href="{% url 'dashboard:home' %}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark p-2" href="{% url 'dashboard:product_list' %}"><i class="bi bi-box-seam me-2"></i> Product Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold text-primary p-2 rounded bg-light" href="{% url 'dashboard:order_list' %}"><i class="bi bi-currency-dollar me-2"></i> Sales Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark p-2" href="{% url 'dashboard:user_list' %}"><i class="bi bi-people me-2"></i> Customers List</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Orders list -->
+    <div class="col-md-9">
+        <h3 class="fw-bold mb-4">Sales Orders</h3>
+        
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Method</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if orders %}
+                            {% for order in orders %}
+                                <tr>
+                                    <td><span class="fw-bold text-dark">#{{ order.id }}</span></td>
+                                    <td class="small">{{ order.user.email }}</td>
+                                    <td class="small text-secondary">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td class="small">{{ order.get_payment_method_display }}</td>
+                                    <td class="fw-bold text-primary">${{ order.final_amount }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.status == 'DELIVERED' %}bg-success
+                                            {% elif order.status == 'PAID' %}bg-primary
+                                            {% elif order.status == 'PENDING' %}bg-warning
+                                            {% elif order.status == 'CANCELLED' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-secondary py-4">No orders placed in platform database.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}ShopSphere - My Orders{% endblock %}
+{% block content %}
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <h4 class="fw-bold mb-4">My Orders</h4>
+    
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Placed On</th>
+                        <th>Billing To</th>
+                        <th>Method</th>
+                        <th>Total Paid</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td><span class="fw-bold text-dark">#{{ order.id }}</span></td>
+                            <td class="small">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                            <td class="small">{{ order.billing_address.full_name }}</td>
+                            <td class="small">{{ order.get_payment_method_display }}</td>
+                            <td class="fw-bold text-primary">${{ order.final_amount }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if order.status == 'DELIVERED' %}bg-success
+                                    {% elif order.status == 'PAID' %}bg-primary
+                                    {% elif order.status == 'PENDING' %}bg-warning
+                                    {% elif order.status == 'CANCELLED' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View Details</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-box fs-1 text-muted mb-3 d-block"></i>
+            <p>You have not placed any orders yet.</p>
+            <a href="{% url 'products:list' %}" class="btn btn-primary rounded-pill px-4">Browse Catalog</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
