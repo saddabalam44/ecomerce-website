@@ -99,8 +99,24 @@ def seed():
         ProductVariant.objects.create(product=p4, name="Color", value="Silver", stock=10)
         ProductVariant.objects.create(product=p4, name="Color", value="Black", stock=10)
 
-    # 5. Premium Denim Jacket
+    # 5. Nintendo Switch OLED
     p5, created = Product.objects.get_or_create(
+        name="Nintendo Switch OLED",
+        slug="nintendo-switch-oled",
+        defaults={
+            'description': "Play on a vibrant 7-inch OLED screen with the Nintendo Switch system in TV, tabletop, or handheld modes.",
+            'price': 349.99,
+            'category': electronics,
+            'stock': 15,
+            'is_featured': True
+        }
+    )
+    if created:
+        ProductVariant.objects.create(product=p5, name="Color", value="White Joy-Con", stock=8)
+        ProductVariant.objects.create(product=p5, name="Color", value="Neon Blue/Red Joy-Con", stock=7)
+
+    # 6. Premium Denim Jacket
+    p6, created = Product.objects.get_or_create(
         name="Premium Denim Jacket",
         slug="premium-denim-jacket",
         defaults={
@@ -113,11 +129,11 @@ def seed():
         }
     )
     if created:
-        ProductVariant.objects.create(product=p5, name="Size", value="Medium", stock=15)
-        ProductVariant.objects.create(product=p5, name="Size", value="Large", stock=10)
+        ProductVariant.objects.create(product=p6, name="Size", value="Medium", stock=15)
+        ProductVariant.objects.create(product=p6, name="Size", value="Large", stock=10)
 
-    # 6. Suede Chelsea Boots
-    p6, created = Product.objects.get_or_create(
+    # 7. Suede Chelsea Boots
+    p7, created = Product.objects.get_or_create(
         name="Suede Chelsea Boots",
         slug="suede-chelsea-boots",
         defaults={
@@ -130,11 +146,11 @@ def seed():
         }
     )
     if created:
-        ProductVariant.objects.create(product=p6, name="Size", value="UK 8", stock=8)
-        ProductVariant.objects.create(product=p6, name="Size", value="UK 9", stock=8)
+        ProductVariant.objects.create(product=p7, name="Size", value="UK 8", stock=8)
+        ProductVariant.objects.create(product=p7, name="Size", value="UK 9", stock=8)
 
-    # 7. Casual Linen Shirt
-    p7, created = Product.objects.get_or_create(
+    # 8. Casual Linen Shirt
+    p8, created = Product.objects.get_or_create(
         name="Casual Linen Shirt",
         slug="casual-linen-shirt",
         defaults={
@@ -146,12 +162,40 @@ def seed():
         }
     )
     if created:
-        ProductVariant.objects.create(product=p7, name="Size", value="Small", stock=10)
-        ProductVariant.objects.create(product=p7, name="Size", value="Medium", stock=15)
-        ProductVariant.objects.create(product=p7, name="Size", value="Large", stock=10)
+        ProductVariant.objects.create(product=p8, name="Size", value="Small", stock=10)
+        ProductVariant.objects.create(product=p8, name="Size", value="Medium", stock=15)
+        ProductVariant.objects.create(product=p8, name="Size", value="Large", stock=10)
 
-    # 8. Minimalist Silent Wall Clock
-    p8, created = Product.objects.get_or_create(
+    # 9. Leather Backpack
+    p9, created = Product.objects.get_or_create(
+        name="Leather Backpack",
+        slug="leather-backpack",
+        defaults={
+            'description': "Handcrafted full-grain leather backpack featuring vintage brass buckles, multiple zipper pouches, and soft padded laptop sleeve.",
+            'price': 199.99,
+            'discount_price': 169.99,
+            'category': fashion,
+            'stock': 10,
+            'is_featured': True
+        }
+    )
+
+    # 10. Polarized Sunglasses
+    p10, created = Product.objects.get_or_create(
+        name="Polarized Sunglasses",
+        slug="polarized-sunglasses",
+        defaults={
+            'description': "Classic unisex polarized sunglasses with UV400 protective lenses, reinforced metal hinges, and sleek acetate frames.",
+            'price': 79.99,
+            'discount_price': 59.99,
+            'category': fashion,
+            'stock': 25,
+            'is_featured': False
+        }
+    )
+
+    # 11. Minimalist Silent Wall Clock
+    p11, created = Product.objects.get_or_create(
         name="Minimalist Silent Wall Clock",
         slug="minimalist-silent-wall-clock",
         defaults={
@@ -163,8 +207,8 @@ def seed():
         }
     )
 
-    # 9. Ceramic Table Lamp
-    p9, created = Product.objects.get_or_create(
+    # 12. Ceramic Table Lamp
+    p12, created = Product.objects.get_or_create(
         name="Ceramic Table Lamp",
         slug="ceramic-table-lamp",
         defaults={
@@ -177,8 +221,8 @@ def seed():
         }
     )
 
-    # 10. Textured Geometric Throw Pillow
-    p10, created = Product.objects.get_or_create(
+    # 13. Textured Geometric Throw Pillow
+    p13, created = Product.objects.get_or_create(
         name="Textured Throw Pillow",
         slug="textured-throw-pillow",
         defaults={
@@ -190,11 +234,11 @@ def seed():
         }
     )
     if created:
-        ProductVariant.objects.create(product=p10, name="Color", value="Off-White", stock=20)
-        ProductVariant.objects.create(product=p10, name="Color", value="Terracotta", stock=20)
+        ProductVariant.objects.create(product=p13, name="Color", value="Off-White", stock=20)
+        ProductVariant.objects.create(product=p13, name="Color", value="Terracotta", stock=20)
 
-    # 11. Handwoven Area Rug
-    p11, created = Product.objects.get_or_create(
+    # 14. Handwoven Area Rug
+    p14, created = Product.objects.get_or_create(
         name="Handwoven Area Rug",
         slug="handwoven-area-rug",
         defaults={
@@ -204,6 +248,33 @@ def seed():
             'category': home_decor,
             'stock': 10,
             'is_featured': True
+        }
+    )
+
+    # 15. Scented Soy Candle Set
+    p15, created = Product.objects.get_or_create(
+        name="Scented Soy Candle Set",
+        slug="scented-soy-candle-set",
+        defaults={
+            'description': "Set of three premium hand-poured soy candles infused with lavender, sandalwood, and sage essential oils.",
+            'price': 35.00,
+            'category': home_decor,
+            'stock': 50,
+            'is_featured': False
+        }
+    )
+
+    # 16. Terrarium Gold Frame
+    p16, created = Product.objects.get_or_create(
+        name="Terrarium Gold Frame",
+        slug="terrarium-gold-frame",
+        defaults={
+            'description': "Modern geometric glass terrarium with brass frame, ideal for air plants, moss, and small succulents.",
+            'price': 55.00,
+            'discount_price': 45.00,
+            'category': home_decor,
+            'stock': 15,
+            'is_featured': False
         }
     )
 

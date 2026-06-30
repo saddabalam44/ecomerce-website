@@ -11,6 +11,8 @@ def copy_and_register_images():
     print("Copying generated images to media and registering in DB...")
     
     # Source paths
+    artifact_dir = r"C:\Users\sadda\OneDrive\Desktop\ecomerce website\media"
+    # Wait, the artifact images are stored in C:\Users\sadda\.gemini\antigravity-ide\brain\0e0d15d4-7305-4eb4-97fa-303c2d01e686
     artifact_dir = r"C:\Users\sadda\.gemini\antigravity-ide\brain\0e0d15d4-7305-4eb4-97fa-303c2d01e686"
     dest_dir = r"c:\Users\sadda\OneDrive\Desktop\ecomerce website\media\products"
     
@@ -28,6 +30,11 @@ def copy_and_register_images():
         ("rug_product_1782841017147.png", "handwoven-area-rug", "rug.png"),
         ("pillow_product_1782841030479.png", "textured-throw-pillow", "pillow.png"),
         ("lamp_product_1782841042446.png", "ceramic-table-lamp", "lamp.png"),
+        ("nintendo_product_1782841248939.png", "nintendo-switch-oled", "nintendo.png"),
+        ("backpack_product_1782841261382.png", "leather-backpack", "backpack.png"),
+        ("sunglasses_product_1782841273812.png", "polarized-sunglasses", "sunglasses.png"),
+        ("candle_product_1782841286332.png", "scented-soy-candle-set", "candle.png"),
+        ("terrarium_product_1782841299075.png", "terrarium-gold-frame", "terrarium.png"),
     ]
     
     for src_name, slug, dest_name in mappings:
