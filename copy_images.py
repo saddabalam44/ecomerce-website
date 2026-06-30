@@ -19,10 +19,15 @@ def copy_and_register_images():
     # Mappings of filenames to slugs
     mappings = [
         ("iphone_product_1782840440898.png", "iphone-15-pro-max", "iphone.png"),
-        ("iphone_product_1782840440898.png", "samsung-galaxy-s24-ultra", "samsung.png"),
+        ("samsung_product_1782840978036.png", "samsung-galaxy-s24-ultra", "samsung.png"),
         ("macbook_product_1782840455052.png", "macbook-pro-14-m3", "macbook.png"),
         ("headphones_product_1782840467510.png", "sony-wh-1000xm5-wireless-headphones", "headphones.png"),
-        ("boots_product_1782840484498.png", "suede-chelsea-boots", "boots.png")
+        ("boots_product_1782840484498.png", "suede-chelsea-boots", "boots.png"),
+        ("shirt_product_1782840990742.png", "casual-linen-shirt", "shirt.png"),
+        ("denim_product_1782841002484.png", "premium-denim-jacket", "denim.png"),
+        ("rug_product_1782841017147.png", "handwoven-area-rug", "rug.png"),
+        ("pillow_product_1782841030479.png", "textured-throw-pillow", "pillow.png"),
+        ("lamp_product_1782841042446.png", "ceramic-table-lamp", "lamp.png"),
     ]
     
     for src_name, slug, dest_name in mappings:
