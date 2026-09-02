@@ -98,7 +98,7 @@
                                 <tr>
                                     <td><span class="fw-bold">#{{ order.id }}</span></td>
                                     <td class="small">{{ order.created_at|date:"Y-m-d" }}</td>
-                                    <td>${{ order.final_amount }}</td>
+                                    <td>₹{{ order.final_amount }}</td>
                                     <td>
                                         <span class="badge 
                                             {% if order.status == 'DELIVERED' %}bg-success

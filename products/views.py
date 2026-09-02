@@ -75,8 +75,11 @@ def product_detail_view(request, slug):
     
     # Check if current user has already reviewed the product
     user_review = None
+    in_wishlist = False
     if request.user.is_authenticated:
         user_review = Review.objects.filter(user=request.user, product=product).first()
+        from wishlist.models import Wishlist
+        in_wishlist = Wishlist.objects.filter(user=request.user, product=product).exists()
 
     return render(request, 'products/product_detail.html', {
         'product': product,
@@ -84,6 +87,7 @@ def product_detail_view(request, slug):
         'variants': variants,
         'avg_rating': avg_rating,
         'user_review': user_review,
+        'in_wishlist': in_wishlist,
     })
 
 

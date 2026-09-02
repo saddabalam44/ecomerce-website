@@ -28,6 +28,33 @@
         <h3 class="fw-bold mb-4">Sales Orders</h3>
         
         <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <!-- Filter Toolbar -->
+            <form method="GET" action="{% url 'dashboard:order_list' %}" class="row g-2 mb-4 align-items-end border-bottom pb-4">
+                <div class="col-md-5">
+                    <label class="form-label small text-secondary fw-semibold">Quick Presets</label>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'dashboard:order_list' %}" class="btn btn-outline-primary btn-sm rounded-start-pill {% if not request.GET.filter_type %}active{% endif %}">All Orders</a>
+                        <a href="{% url 'dashboard:order_list' %}?filter_type=today" class="btn btn-outline-primary btn-sm {% if request.GET.filter_type == 'today' %}active{% endif %}">Today</a>
+                        <a href="{% url 'dashboard:order_list' %}?filter_type=yesterday" class="btn btn-outline-primary btn-sm rounded-end-pill {% if request.GET.filter_type == 'yesterday' %}active{% endif %}">Yesterday</a>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="filter-date" class="form-label small text-secondary fw-semibold">Filter by Custom Date</label>
+                    <div class="input-group">
+                        <input type="hidden" name="filter_type" value="date">
+                        <input type="date" id="filter-date" name="date" class="form-control form-control-sm" value="{{ request.GET.date }}">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-end-pill px-3">Filter</button>
+                    </div>
+                </div>
+                
+                {% if request.GET.filter_type %}
+                    <div class="col-md-3">
+                        <a href="{% url 'dashboard:order_list' %}" class="btn btn-outline-danger btn-sm rounded-pill w-100"><i class="bi bi-x-circle me-1"></i> Clear Filters</a>
+                    </div>
+                {% endif %}
+            </form>
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
@@ -49,7 +76,7 @@
                                     <td class="small">{{ order.user.email }}</td>
                                     <td class="small text-secondary">{{ order.created_at|date:"Y-m-d H:i" }}</td>
                                     <td class="small">{{ order.get_payment_method_display }}</td>
-                                    <td class="fw-bold text-primary">${{ order.final_amount }}</td>
+                                    <td class="fw-bold text-primary">₹{{ order.final_amount }}</td>
                                     <td>
                                         <span class="badge 
                                             {% if order.status == 'DELIVERED' %}bg-success
@@ -61,7 +88,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
+                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
                                     </td>
                                 </tr>
                             {% endfor %}

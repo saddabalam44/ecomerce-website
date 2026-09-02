@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from orders.models import Order
@@ -26,27 +26,26 @@ def payment_selection_view(request, order_id):
     if order.status != 'PENDING':
         messages.warning(request, "This order is already processed.")
         return redirect('orders:order_detail', order_id=order.id)
-        
+
     return render(request, 'payments/payment_selection.html', {
         'order': order,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
-        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
     })
 
 @login_required
 def stripe_checkout_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    
+
     # Mock Stripe mode for local development
     if settings.STRIPE_SECRET_KEY == 'sk_test_mock':
         return render(request, 'payments/stripe_mock.html', {'order': order})
-        
+
     try:
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
-                    'currency': 'usd',
+                    'currency': 'inr',
                     'product_data': {
                         'name': f"Order #{order.id} on ShopSphere",
                     },
@@ -73,11 +72,9 @@ def stripe_success_view(request):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     session_id = request.GET.get('session_id')
 
-    # Update Order
     order.status = 'PAID'
     order.save()
 
-    # Record Payment
     Payment.objects.update_or_create(
         order=order,
         defaults={
@@ -88,7 +85,6 @@ def stripe_success_view(request):
         }
     )
 
-    # Create Notification
     Notification.objects.create(
         user=request.user,
         message=f"Payment for Order #{order.id} verified successfully via Stripe!"
@@ -103,7 +99,6 @@ def stripe_cancel_view(request):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     messages.error(request, "Stripe payment was cancelled.")
     return redirect('payments:payment_selection', order_id=order.id)
-
 
 @login_required
 def razorpay_checkout_view(request, order_id):

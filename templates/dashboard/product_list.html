@@ -27,7 +27,9 @@
     <div class="col-md-9">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold mb-0">Product Inventory</h3>
-            <a href="/admin/products/product/add/" class="btn btn-primary rounded-pill px-4" target="_blank"><i class="bi bi-plus-lg me-1"></i> Add Product</a>
+            <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="bi bi-plus-lg me-1"></i> Add Product
+            </button>
         </div>
         
         <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
@@ -41,6 +43,7 @@
                             <th>Standard Price</th>
                             <th>Stock Level</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,7 +62,7 @@
                                         <span class="small text-secondary">{{ prod.slug }}</span>
                                     </td>
                                     <td class="small text-secondary">{{ prod.category.name }}</td>
-                                    <td class="fw-bold">${{ prod.price }}</td>
+                                    <td class="fw-bold">₹{{ prod.price }}</td>
                                     <td>
                                         <span class="fw-semibold {% if prod.stock <= 5 %}text-danger{% else %}text-dark{% endif %}">
                                             {{ prod.stock }} units
@@ -72,11 +75,21 @@
                                             <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#editProductModal-{{ prod.id }}">
+                                                <i class="bi bi-pencil me-1"></i> Edit
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteProductModal-{{ prod.id }}">
+                                                <i class="bi bi-trash me-1"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="text-center text-secondary py-4">No products found in database.</td>
+                                <td colspan="7" class="text-center text-secondary py-4">No products found in database.</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -85,4 +98,185 @@
         </div>
     </div>
 </div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pt-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold" id="addProductModalLabel"><i class="bi bi-box-seam text-primary me-2"></i>Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'dashboard:product_create' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body px-4 py-3">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="id_name" class="form-label small fw-bold text-secondary">Product Name</label>
+                            <input type="text" name="name" class="form-control rounded-3" id="id_name" required placeholder="e.g. Minimalist Silent Wall Clock">
+                        </div>
+                        <div class="col-12">
+                            <label for="id_description" class="form-label small fw-bold text-secondary">Description</label>
+                            <textarea name="description" class="form-control rounded-3" id="id_description" rows="3" required placeholder="Describe product details, features, specifications..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_category" class="form-label small fw-bold text-secondary">Category</label>
+                            <select name="category" class="form-select rounded-3" id="id_category" required>
+                                <option value="" selected disabled>Select Category</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_image" class="form-label small fw-bold text-secondary">Product Image</label>
+                            <input type="file" name="image" class="form-control rounded-3" id="id_image" accept="image/*">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_price" class="form-label small fw-bold text-secondary">Standard Price (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">₹</span>
+                                <input type="number" step="0.01" name="price" class="form-control rounded-end-3 border-start-0" id="id_price" required placeholder="0.00" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_discount_price" class="form-label small fw-bold text-secondary">Discount Price (₹) <span class="text-muted fw-normal">(Optional)</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">₹</span>
+                                <input type="number" step="0.01" name="discount_price" class="form-control rounded-end-3 border-start-0" id="id_discount_price" placeholder="0.00" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_stock" class="form-label small fw-bold text-secondary">Stock Level</label>
+                            <input type="number" name="stock" class="form-control rounded-3" id="id_stock" required value="0" min="0">
+                        </div>
+                        <div class="col-12 mt-4 d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured">
+                                <label class="form-check-label fw-semibold text-dark" for="id_is_featured">
+                                    Featured Product
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" checked>
+                                <label class="form-check-label fw-semibold text-dark" for="id_is_active">
+                                    Active &amp; Visible
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Create Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% for prod in products %}
+<!-- Edit Product Modal for {{ prod.name }} -->
+<div class="modal fade" id="editProductModal-{{ prod.id }}" tabindex="-1" aria-labelledby="editProductModalLabel-{{ prod.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pt-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold" id="editProductModalLabel-{{ prod.id }}"><i class="bi bi-pencil text-primary me-2"></i>Edit Product: {{ prod.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'dashboard:product_edit' prod.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body px-4 py-3">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="id_name-{{ prod.id }}" class="form-label small fw-bold text-secondary">Product Name</label>
+                            <input type="text" name="name" class="form-control rounded-3" id="id_name-{{ prod.id }}" required value="{{ prod.name }}">
+                        </div>
+                        <div class="col-12">
+                            <label for="id_description-{{ prod.id }}" class="form-label small fw-bold text-secondary">Description</label>
+                            <textarea name="description" class="form-control rounded-3" id="id_description-{{ prod.id }}" rows="3" required>{{ prod.description }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_category-{{ prod.id }}" class="form-label small fw-bold text-secondary">Category</label>
+                            <select name="category" class="form-select rounded-3" id="id_category-{{ prod.id }}" required>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if cat.id == prod.category.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_image-{{ prod.id }}" class="form-label small fw-bold text-secondary">Product Image <span class="text-muted fw-normal">(Leave blank to keep existing)</span></label>
+                            <input type="file" name="image" class="form-control rounded-3" id="id_image-{{ prod.id }}" accept="image/*">
+                            {% if prod.images.first %}
+                                <div class="mt-2 small text-secondary">
+                                    Current: <a href="{{ prod.images.first.image.url }}" target="_blank">{{ prod.images.first.image.name }}</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_price-{{ prod.id }}" class="form-label small fw-bold text-secondary">Standard Price (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">₹</span>
+                                <input type="number" step="0.01" name="price" class="form-control rounded-end-3 border-start-0" id="id_price-{{ prod.id }}" required value="{{ prod.price }}" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_discount_price-{{ prod.id }}" class="form-label small fw-bold text-secondary">Discount Price (₹) <span class="text-muted fw-normal">(Optional)</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">₹</span>
+                                <input type="number" step="0.01" name="discount_price" class="form-control rounded-end-3 border-start-0" id="id_discount_price-{{ prod.id }}" value="{% if prod.discount_price %}{{ prod.discount_price }}{% endif %}" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_stock-{{ prod.id }}" class="form-label small fw-bold text-secondary">Stock Level</label>
+                            <input type="number" name="stock" class="form-control rounded-3" id="id_stock-{{ prod.id }}" required value="{{ prod.stock }}" min="0">
+                        </div>
+                        <div class="col-12 mt-4 d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured-{{ prod.id }}" {% if prod.is_featured %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold text-dark" for="id_is_featured-{{ prod.id }}">
+                                    Featured Product
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active-{{ prod.id }}" {% if prod.is_active %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold text-dark" for="id_is_active-{{ prod.id }}">
+                                    Active &amp; Visible
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal for {{ prod.name }} -->
+<div class="modal fade" id="deleteProductModal-{{ prod.id }}" tabindex="-1" aria-labelledby="deleteProductModalLabel-{{ prod.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pt-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold" id="deleteProductModalLabel-{{ prod.id }}"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'dashboard:product_delete' prod.id %}">
+                {% csrf_token %}
+                <div class="modal-body px-4 py-3">
+                    <p class="mb-0">Are you sure you want to delete product <strong>"{{ prod.name }}"</strong>? This action cannot be undone and will cascade to delete related product variants and images.</p>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Confirm Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock %}

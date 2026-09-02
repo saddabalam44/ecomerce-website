@@ -72,7 +72,12 @@ def login_view(request):
                 session_cart.merge_with_database(user)
                 
                 messages.success(request, f"Welcome back, {user.username}!")
-                next_url = request.GET.get('next', 'core:home')
+                next_url = request.GET.get('next')
+                if not next_url or next_url == 'core:home' or next_url == '/' or next_url == 'core/':
+                    if user.is_staff:
+                        return redirect('dashboard:home')
+                    else:
+                        return redirect('core:home')
                 return redirect(next_url)
             else:
                 messages.error(request, "Invalid email or password.")
@@ -88,6 +93,8 @@ def logout_view(request):
 @login_required
 def profile_view(request):
     user = request.user
+    if user.is_staff:
+        return redirect('dashboard:home')
     addresses = user.addresses.all()
     orders = user.orders.all().order_by('-created_at')
     

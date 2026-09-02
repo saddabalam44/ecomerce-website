@@ -58,10 +58,11 @@
                     <div class="border rounded-4 p-3 d-flex align-items-center">
                         <input class="form-check-input me-3" type="radio" name="payment_method" value="RAZORPAY">
                         <div>
-                            <h6 class="fw-bold mb-0"><i class="bi bi-credit-card text-info me-2"></i> Pay with Razorpay</h6>
-                            <p class="small text-secondary mb-0">Pay online using Razorpay UPI, Cards, Netbanking.</p>
+                            <h6 class="fw-bold mb-0"><i class="bi bi-credit-card text-primary me-2"></i> Pay with Razorpay</h6>
+                            <p class="small text-secondary mb-0">Pay with UPI, Cards, Netbanking, or Wallets via Razorpay.</p>
                         </div>
                     </div>
+
                 </div>
                 
                 {% if addresses %}
@@ -96,30 +97,30 @@
                             <h6 class="fw-bold mb-0 small">{{ item.product.name }}</h6>
                             <span class="text-secondary small">Qty: {{ item.quantity }}</span>
                         </div>
-                        <span class="fw-bold text-dark small">${{ item.total_price }}</span>
+                        <span class="fw-bold text-dark small">₹{{ item.total_price }}</span>
                     </div>
                 {% endfor %}
             </div>
 
             <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
                 <span class="text-secondary">Cart Subtotal</span>
-                <span class="fw-semibold">$<span class="chk-subtotal">{{ subtotal }}</span></span>
+                <span class="fw-semibold">₹<span class="chk-subtotal">{{ subtotal }}</span></span>
             </div>
             <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
                 <span class="text-secondary">Discount Applied</span>
-                <span class="fw-semibold text-success">-$<span class="chk-discount">{{ discount }}</span></span>
+                <span class="fw-semibold text-success">-₹<span class="chk-discount">{{ discount }}</span></span>
             </div>
             <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
                 <span class="text-secondary">Shipping Charge</span>
-                <span class="fw-semibold">$<span class="chk-shipping">{{ shipping }}</span></span>
+                <span class="fw-semibold">₹<span class="chk-shipping">{{ shipping }}</span></span>
             </div>
             <div class="d-flex justify-content-between mb-3 border-bottom pb-2 small">
                 <span class="text-secondary">Tax (5%)</span>
-                <span class="fw-semibold">$<span class="chk-tax">{{ tax }}</span></span>
+                <span class="fw-semibold">₹<span class="chk-tax">{{ tax }}</span></span>
             </div>
             <div class="d-flex justify-content-between mb-4">
                 <span class="fw-bold fs-5">Grand Total</span>
-                <span class="fw-bold fs-5 text-primary">$<span class="chk-final-total">{{ final_total }}</span></span>
+                <span class="fw-bold fs-5 text-primary">₹<span class="chk-final-total">{{ final_total }}</span></span>
             </div>
         </div>
     </div>

@@ -32,7 +32,7 @@
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
                     <span class="text-secondary small text-uppercase fw-semibold">Total Revenue</span>
-                    <h2 class="fw-bold text-primary mt-1 mb-0">${{ total_revenue }}</h2>
+                    <h2 class="fw-bold text-primary mt-1 mb-0">₹{{ total_revenue }}</h2>
                     <span class="small text-success mt-2"><i class="bi bi-graph-up me-1"></i> +12% this month</span>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                                         <tr>
                                             <td><span class="small fw-semibold">{{ share.product__category__name }}</span></td>
                                             <td class="text-end small">{{ share.sold_count }}</td>
-                                            <td class="text-end fw-semibold text-primary small">${{ share.revenue }}</td>
+                                            <td class="text-end fw-semibold text-primary small">₹{{ share.revenue }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -117,7 +117,7 @@
                                         <tr>
                                             <td class="small text-secondary">{{ day.day }}</td>
                                             <td class="text-end small">{{ day.count }}</td>
-                                            <td class="text-end fw-semibold text-primary small">${{ day.total }}</td>
+                                            <td class="text-end fw-semibold text-primary small">₹{{ day.total }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -152,7 +152,7 @@
                                     <td><span class="fw-bold">#{{ order.id }}</span></td>
                                     <td class="small">{{ order.user.email }}</td>
                                     <td class="small">{{ order.get_payment_method_display }}</td>
-                                    <td class="fw-semibold text-primary">${{ order.final_amount }}</td>
+                                    <td class="fw-semibold text-primary">₹{{ order.final_amount }}</td>
                                     <td>
                                         <span class="badge 
                                             {% if order.status == 'DELIVERED' %}bg-success
@@ -163,7 +163,7 @@
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
+                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
                                     </td>
                                 </tr>
                             {% endfor %}

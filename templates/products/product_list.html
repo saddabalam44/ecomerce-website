@@ -93,10 +93,10 @@
                                 
                                 <div class="d-flex align-items-center mb-3 mt-auto">
                                     {% if prod.discount_price %}
-                                        <span class="fs-5 fw-bold text-primary me-2">${{ prod.discount_price }}</span>
-                                        <span class="text-decoration-line-through text-muted small">${{ prod.price }}</span>
+                                        <span class="fs-5 fw-bold text-primary me-2">₹{{ prod.discount_price }}</span>
+                                        <span class="text-decoration-line-through text-muted small">₹{{ prod.price }}</span>
                                     {% else %}
-                                        <span class="fs-5 fw-bold text-dark">${{ prod.price }}</span>
+                                        <span class="fs-5 fw-bold text-dark">₹{{ prod.price }}</span>
                                     {% endif %}
                                 </div>
                                 

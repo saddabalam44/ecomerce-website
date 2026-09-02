@@ -42,7 +42,7 @@
                             
                             <!-- Price & Delete -->
                             <div class="col-6 col-md-3 text-end mt-2 mt-md-0">
-                                <span class="fw-bold fs-5 text-primary">$<span class="item-total">{{ item.total_price }}</span></span>
+                                <span class="fw-bold fs-5 text-primary">₹<span class="item-total">{{ item.total_price }}</span></span>
                                 <button class="btn text-danger ms-2 btn-remove-item border-0"><i class="bi bi-trash fs-5"></i></button>
                             </div>
                         </div>
@@ -66,20 +66,20 @@
                 
                 <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                     <span class="text-secondary">Subtotal</span>
-                    <span class="fw-bold">$<span class="cart-subtotal">{{ total_price }}</span></span>
+                    <span class="fw-bold">₹<span class="cart-subtotal">{{ total_price }}</span></span>
                 </div>
                 <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                     <span class="text-secondary">Shipping</span>
-                    <span class="fw-bold" id="shipping-fee">{% if total_price < 500 %}$50.00{% else %}Free{% endif %}</span>
+                    <span class="fw-bold" id="shipping-fee">{% if total_price < 500 %}₹50.00{% else %}Free{% endif %}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-4 pb-2 border-bottom">
                     <span class="text-secondary">Est. Tax (5%)</span>
-                    <span class="fw-bold">$<span class="cart-tax">0.00</span></span>
+                    <span class="fw-bold">₹<span class="cart-tax">0.00</span></span>
                 </div>
 
                 <div class="d-flex justify-content-between mb-4">
                     <span class="fw-bold fs-5">Estimated Total</span>
-                    <span class="fw-bold fs-5 text-primary">$<span class="cart-total-est">{{ total_price }}</span></span>
+                    <span class="fw-bold fs-5 text-primary">₹<span class="cart-total-est">{{ total_price }}</span></span>
                 </div>
                 
                 <a href="{% url 'orders:checkout' %}" class="btn btn-gradient w-100 rounded-pill py-2.5">Proceed to Checkout</a>
@@ -100,7 +100,7 @@
             const shipping = subtotal < 500 ? 50.00 : 0.00;
             
             document.querySelector(".cart-tax").textContent = tax;
-            document.getElementById("shipping-fee").textContent = shipping === 0 ? "Free" : "$50.00";
+            document.getElementById("shipping-fee").textContent = shipping === 0 ? "Free" : "₹50.00";
             
             const total = (subtotal + parseFloat(tax) + shipping).toFixed(2);
             document.querySelector(".cart-total-est").textContent = total;

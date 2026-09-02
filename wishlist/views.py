@@ -14,14 +14,16 @@ def wishlist_detail_view(request):
 @login_required
 def wishlist_add_view(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, product=product)
+    wishlist_item = Wishlist.objects.filter(user=request.user, product=product).first()
     
-    if created:
+    if wishlist_item:
+        wishlist_item.delete()
+        msg = "Product removed from wishlist."
+        status_msg = "removed"
+    else:
+        Wishlist.objects.create(user=request.user, product=product)
         msg = "Product added to wishlist."
         status_msg = "added"
-    else:
-        msg = "Product is already in your wishlist."
-        status_msg = "exists"
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         count = Wishlist.objects.filter(user=request.user).count()

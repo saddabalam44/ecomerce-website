@@ -19,7 +19,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-+ke+@iia%@go)d^*4y80(j*971(9$n*6lp#k5ua!@f=lnt!im^')
 DEBUG = env.bool('DEBUG', default=True)
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.vercel.app', '*'])
 
 # Application definition
 INSTALLED_APPS = [
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,7 +119,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'static_collected'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media Uploads (User uploads, avatars, product pictures)
 MEDIA_URL = 'media/'
@@ -145,7 +146,7 @@ STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_mock')
 STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='whsec_mock')
 
 RAZORPAY_KEY_ID = env('RAZORPAY_KEY_ID', default='rzp_test_mock')
-RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET', default='mock_secret')
+RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET', default='rzp_secret_mock')
 
 # Email Backend Settings
 USE_CONSOLE_EMAIL = env.bool('USE_CONSOLE_EMAIL', default=True)

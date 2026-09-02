@@ -174,17 +174,25 @@ def order_success_view(request, order_id):
 
 @login_required
 def order_list_view(request):
+    if request.user.is_staff:
+        return redirect('dashboard:order_list')
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'orders/order_list.html', {'orders': orders})
 
 @login_required
 def order_detail_view(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.user.is_staff:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'orders/order_detail.html', {'order': order})
 
 @login_required
 def cancel_order_view(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.user.is_staff:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
     if order.status in ['PENDING', 'PAID']:
         order.status = 'CANCELLED'
         order.save()
@@ -202,7 +210,10 @@ def cancel_order_view(request, order_id):
 
 @login_required
 def return_order_view(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.user.is_staff:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
     if order.status == 'DELIVERED':
         order.status = 'RETURNED'
         order.save()
@@ -219,7 +230,10 @@ def return_order_view(request, order_id):
 
 @login_required
 def generate_invoice_pdf_view(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.user.is_staff:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
     
     # Create the PDF in memory
     buffer = io.BytesIO()
@@ -253,16 +267,16 @@ def generate_invoice_pdf_view(request, order_id):
             item.product.name,
             variant_txt,
             str(item.quantity),
-            f"${item.price}",
-            f"${item.total_price}"
+            f"₹{item.price}",
+            f"₹{item.total_price}"
         ])
 
-    data.append(['', '', '', 'Subtotal:', f"${order.total_amount}"])
+    data.append(['', '', '', 'Subtotal:', f"₹{order.total_amount}"])
     if order.discount_amount > 0:
-        data.append(['', '', '', 'Discount:', f"-${order.discount_amount}"])
-    data.append(['', '', '', 'Shipping:', f"${order.shipping_charge}"])
-    data.append(['', '', '', 'Tax (5%):', f"${order.tax}"])
-    data.append(['', '', '', 'Total Paid:', f"${order.final_amount}"])
+        data.append(['', '', '', 'Discount:', f"-₹{order.discount_amount}"])
+    data.append(['', '', '', 'Shipping:', f"₹{order.shipping_charge}"])
+    data.append(['', '', '', 'Tax (5%):', f"₹{order.tax}"])
+    data.append(['', '', '', 'Total Paid:', f"₹{order.final_amount}"])
 
     t = Table(data, colWidths=[200, 100, 50, 90, 100])
     t.setStyle(TableStyle([

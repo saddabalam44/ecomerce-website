@@ -153,6 +153,16 @@ def seed():
         }
     )
 
+    # Create default Admin superuser if not exists
+    from accounts.models import CustomUser
+    if not CustomUser.objects.filter(email="admin@shopsphere.com").exists():
+        CustomUser.objects.create_superuser(
+            username="admin",
+            email="admin@shopsphere.com",
+            password="adminpassword"
+        )
+        print("Default admin superuser created: admin@shopsphere.com / adminpassword")
+
     print("Database seeding completed successfully!")
 
 if __name__ == '__main__':

@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "shopsphere/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "shopsphere/wsgi.py"
+    }
+  ]
+}
